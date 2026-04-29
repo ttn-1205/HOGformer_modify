@@ -54,8 +54,7 @@ print('Params = ' + str(params/1000**2) + 'M')
 '''
 model_restoration.load_state_dict(checkpoint['params'])
 print("===>Testing using weights: ",args.weights)
-model_restoration.cuda()
-model_restoration = nn.DataParallel(model_restoration)
+model_restoration = model_restoration.cuda().half()
 model_restoration.eval()
 factor = 16
 result_dir  = os.path.join(args.result_dir)
@@ -68,7 +67,7 @@ with torch.no_grad():
         torch.cuda.empty_cache()
         img = np.float32(util.load_img(file_))/255.
         img = torch.from_numpy(img).permute(2,0,1)
-        input_ = img.unsqueeze(0).cuda()
+        input_ = img.unsqueeze(0).cuda().half()
         # Padding in case images are not multiples of factor
         h,w = input_.shape[2], input_.shape[3]
         H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
