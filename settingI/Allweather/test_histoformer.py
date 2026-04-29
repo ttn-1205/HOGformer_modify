@@ -54,7 +54,7 @@ print('Params = ' + str(params/1000**2) + 'M')
 '''
 model_restoration.load_state_dict(checkpoint['params'])
 print("===>Testing using weights: ",args.weights)
-model_restoration = model_restoration.cuda().half()
+model_restoration = model_restoration.cuda()
 model_restoration.eval()
 factor = 16
 result_dir  = os.path.join(args.result_dir)
@@ -65,15 +65,15 @@ with torch.no_grad():
     for file_ in tqdm(files):
         torch.cuda.ipc_collect()
         torch.cuda.empty_cache()
-        img = np.float32(util.load_img(file_))/255.
+        img = np.float16(util.load_img(file_))/255.
         img = torch.from_numpy(img).permute(2,0,1)
-        input_ = img.unsqueeze(0).cuda().half()
+        input_ = img.unsqueeze(0).cuda()
         # Padding in case images are not multiples of factor
         h,w = input_.shape[2], input_.shape[3]
         H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
         padh = H-h if h%factor!=0 else 0
         padw = W-w if w%factor!=0 else 0
-        input_ = F.pad(input_, (0,padw,0,padh), 'reflect').half()
+        input_ = F.pad(input_, (0,padw,0,padh), 'reflect')
         time1 = time.time()
         restored = model_restoration(input_)
         # hybrid degradation
