@@ -81,7 +81,12 @@ def safe_forward(model, input_, tile_size=256, overlap=32):
             # padding (same logic as original, just local)
             pad_h = tile_size - (y2 - y1)
             pad_w = tile_size - (x2 - x1)
-            tile = F.pad(tile, (0, pad_w, 0, pad_h), 'reflect')
+            if pad_h > 0 or pad_w > 0:
+                if (tile.shape[2] <= pad_h) or (tile.shape[3] <= pad_w):
+                    # fallback for very small tiles
+                    tile = F.pad(tile, (0, pad_w, 0, pad_h), mode='replicate')
+                else:
+                    tile = F.pad(tile, (0, pad_w, 0, pad_h), mode='reflect')
 
             out_tile = model(tile)
 
