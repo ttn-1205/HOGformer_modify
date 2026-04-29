@@ -73,7 +73,7 @@ with torch.no_grad():
         H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
         padh = H-h if h%factor!=0 else 0
         padw = W-w if w%factor!=0 else 0
-        input_ = F.pad(input_, (0,padw,0,padh), 'reflect')
+        input_ = F.pad(input_, (0,padw,0,padh), 'reflect').half()
         time1 = time.time()
         restored = model_restoration(input_)
         # hybrid degradation
